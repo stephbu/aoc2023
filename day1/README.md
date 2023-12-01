@@ -20,7 +20,7 @@ Rider does a great job of being compatible with VS/VSCode.
 
 ## Puzzle 1
 Got going pretty quick, used an enumerator to read lines.  Used LINQ enumerate characters to find first and last digits.
-Love the concise method group syntax for First<char>(Char.IsDigit) and Last<char>(Char.IsDigit).
+Love the concise method group syntax for ```First<char>(Char.IsDigit)``` and ```Last<char>(Char.IsDigit)```.
 String concatenation into an int.parse got it done.
 
 ## Puzzle 2
