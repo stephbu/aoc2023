@@ -36,15 +36,19 @@ public class Day1
     public static int GetTransformedSumFromLine(string line)
     {
         var transformedStringBuilder = new StringBuilder();
-        for(int i=0; i < line.Length; i++)
+        
+        // ltr find first digit or digit name
+        var isMatch = false;
+        for(int i=0; i < line.Length && !isMatch; i++)
         {
             if (char.IsDigit(line[i]))
             {
                 transformedStringBuilder.Append(line[i]);
+                isMatch = true;
+                continue;
             }
             else
             {
-                // var isMatch = false;
                 foreach (var numberMapKey in DigitMap.Keys)
                 {
                     if(i + numberMapKey.Length > line.Length)
@@ -56,16 +60,40 @@ public class Day1
                     {
                         // found a match append digit and skip ahead
                         transformedStringBuilder.Append(DigitMap[numberMapKey]);
-                        // isMatch = true;
+                        isMatch = true;
                         break;
                     }
                 }
-
-                // if (isMatch == false)
-                // {
-                //     // no match 
-                //     transformedStringBuilder.Append(line[i]);
-                // }
+            }
+        }
+        
+        // rtl find last digit or digit name
+        isMatch = false;
+        for (int i = line.Length - 1; i >= 0 && !isMatch; i--)
+        {
+            if (char.IsDigit(line[i]))
+            {
+                transformedStringBuilder.Append(line[i]);
+                isMatch = true;
+                continue;
+            }
+            else
+            {
+                foreach (var numberMapKey in DigitMap.Keys)
+                {
+                    if(i + numberMapKey.Length > line.Length)
+                    {
+                        // skip digit names that are too long
+                        continue;
+                    }
+                    if (line.Substring(i).StartsWith(numberMapKey))
+                    {
+                        // found a match append digit and skip ahead
+                        transformedStringBuilder.Append(DigitMap[numberMapKey]);
+                        isMatch = true;
+                        break;
+                    }
+                }
             }
         }
 
@@ -75,6 +103,8 @@ public class Day1
         Console.WriteLine($"{line} -> {transformedString} = {sum}");
         return sum;
     }
+    
+    
     
     public static int GetTransformedSumFromLineOld(string line)
     {

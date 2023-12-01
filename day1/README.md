@@ -24,16 +24,8 @@ Love the concise method group syntax for ```First<char>(Char.IsDigit)``` and ```
 String concatenation into an int.parse got it done.
 
 ## Puzzle 2
-I was able to reuse the code from Puzzle 1, but had to refactor it to enable a line preprocessor.
-Got hung up greedy preprocessing - ```oneight``` becoming ```1ight``` instead of the expected ```18```.  
-
-Unfortunately the test data didn't illustrate the expected non-greedy behaviour. It could have used 
-```eightwothree``` to illustrate the expected preprocessing behaviour ```823```.  
-Unfortunately in both greedy and non-greedy approaches they have the same first-digit/last-digi/checksum
-Luckily I figured out by experimentation.
-
-I brought through non-digit characters, so I could visually debug the preprocessor issue.  The "no digit, no match"
-case could have been skipped, but I left it in for clarity.
+Got hung up greedy preprocessing the string LTR to minimize code changes - ```oneight``` becoming ```1ight``` instead of the expected ```18```.  
+I simplified the approach to go LTR until first, then RTL until last to figure it out.
 
 ## Summary
 Done by 1am EST on Day 1 - I'm happy with that, and ready for Day 2.
