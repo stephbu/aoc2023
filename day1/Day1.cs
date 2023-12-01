@@ -13,14 +13,14 @@ public class Day1
         
         foreach (var line in lines)
         {
-            var sum = GetTransformedSumFromLine(line);
-            totalSum += sum;
+            var checksum = GetTransformedSumFromLine(line);
+            totalSum += checksum;
         }
 
         return totalSum;
     }
     
-    public static Dictionary<string,char> NumberMap = new Dictionary<string, char>()
+    public static Dictionary<string,char> DigitMap = new Dictionary<string, char>()
     {
         {"one", '1'},
         {"two", '2'},
@@ -35,7 +35,6 @@ public class Day1
     
     public static int GetTransformedSumFromLine(string line)
     {
-        
         var transformedStringBuilder = new StringBuilder();
         for(int i=0; i < line.Length; i++)
         {
@@ -45,37 +44,37 @@ public class Day1
             }
             else
             {
-                var isMatch = false;
-                foreach (var numberMapKey in NumberMap.Keys)
+                // var isMatch = false;
+                foreach (var numberMapKey in DigitMap.Keys)
                 {
                     if(i + numberMapKey.Length > line.Length)
                     {
+                        // skip digit names that are too long
                         continue;
                     }
-                    if (line.Substring(i, numberMapKey.Length).StartsWith(numberMapKey))
+                    if (line.Substring(i).StartsWith(numberMapKey))
                     {
-                        // found a match
-                        transformedStringBuilder.Append(NumberMap[numberMapKey]);
-                        isMatch = true;
+                        // found a match append digit and skip ahead
+                        transformedStringBuilder.Append(DigitMap[numberMapKey]);
+                        // isMatch = true;
                         break;
                     }
                 }
 
-                if (isMatch == false)
-                {
-                    // no match 
-                    transformedStringBuilder.Append(line[i]);
-                }
+                // if (isMatch == false)
+                // {
+                //     // no match 
+                //     transformedStringBuilder.Append(line[i]);
+                // }
             }
         }
 
         var transformedString = transformedStringBuilder.ToString();
         
-        var sum = GetSumFromLine(transformedString);
+        var sum = GetChecksumFromLine(transformedString);
         Console.WriteLine($"{line} -> {transformedString} = {sum}");
         return sum;
     }
-
     
     public static int GetTransformedSumFromLineOld(string line)
     {
@@ -90,7 +89,7 @@ public class Day1
             else
             {
                 var isMatch = false;
-                foreach (var numberMapKey in NumberMap.Keys)
+                foreach (var numberMapKey in DigitMap.Keys)
                 {
                     if(i + numberMapKey.Length > line.Length)
                     {
@@ -99,7 +98,7 @@ public class Day1
                     if (line.Substring(i, numberMapKey.Length).StartsWith(numberMapKey))
                     {
                         // found a match
-                        transformedStringBuilder.Append(NumberMap[numberMapKey]);
+                        transformedStringBuilder.Append(DigitMap[numberMapKey]);
                         i = i + numberMapKey.Length - 1;
                         isMatch = true;
                         break;
@@ -117,7 +116,7 @@ public class Day1
         var transformedString = transformedStringBuilder.ToString();
 
         
-        var sum = GetSumFromLine(transformedString);
+        var sum = GetChecksumFromLine(transformedString);
         Console.WriteLine($"{line} -> {transformedString} = {sum}");
         return sum;
     }
@@ -130,18 +129,18 @@ public class Day1
         
         foreach (var line in lines)
         {
-            var sum = GetSumFromLine(line);
+            var sum = GetChecksumFromLine(line);
             totalSum += sum;
         }
 
         return totalSum;
     }
 
-    public static int GetSumFromLine(string line)
+    public static int GetChecksumFromLine(string line)
     {
         var firstDigit = line.First(char.IsDigit);
         var lastDigit = line.Last(char.IsDigit);
-        var sum = int.Parse(string.Concat(firstDigit, lastDigit));
-        return sum;
+        var checksum = int.Parse(string.Concat(firstDigit, lastDigit));
+        return checksum;
     }
 }

@@ -25,11 +25,12 @@ String concatenation into an int.parse got it done.
 
 ## Puzzle 2
 I was able to reuse the code from Puzzle 1, but had to refactor it to enable a line preprocessor.
-Got hung up on ```oneight``` becoming ```18``` instead of ```1ight```.  Despite this, the test data worked like a charm, 
-but the specification of how to preprocess the data was not clear.  
+Got hung up greedy preprocessing - ```oneight``` becoming ```1ight``` instead of the expected ```18```.  
 
-The test data case that should have shown expected behavior was ```eightwothree``` unfortunately 
-with method one generated ```8wo3``` vs the expected ```823```.  Luckily I figured out.
+Unfortunately the test data didn't illustrate the expected non-greedy behaviour. It could have used 
+```eightwothree``` to illustrate the expected preprocessing behaviour ```823```.  
+Unfortunately in both greedy and non-greedy approaches they have the same first-digit/last-digi/checksum
+Luckily I figured out by experimentation.
 
 I brought through non-digit characters, so I could visually debug the preprocessor issue.  The "no digit, no match"
 case could have been skipped, but I left it in for clarity.
