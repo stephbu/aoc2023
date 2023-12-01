@@ -31,5 +31,8 @@ but the specification of how to preprocess the data was not clear.
 The test data case that should have shown expected behavior was ```eightwothree``` unfortunately 
 with method one generated ```8wo3``` vs the expected ```823```.  Luckily I figured out.
 
+I brought through non-digit characters, so I could visually debug the preprocessor issue.  The "no digit, no match"
+case could have been skipped, but I left it in for clarity.
+
 ## Summary
 Done by 1am EST on Day 1 - I'm happy with that, and ready for Day 2.
