@@ -16,4 +16,20 @@ I had a productive day coding before which helps a lot.  Did some prework to get
 - Updated to Jetbrains Rider 2023.2.3
 
 Figure that most of the time I'll be writing at night on my Mac, with Rider as primary IDE.
-Rider does a great job of being compatible with VS/VSCode
+Rider does a great job of being compatible with VS/VSCode.
+
+## Puzzle 1
+Got going pretty quick, used an enumerator to read lines.  Used LINQ enumerate characters to find first and last digits.
+Love the concise method group syntax for First<char>(Char.IsDigit) and Last<char>(Char.IsDigit).
+String concatenation into an int.parse got it done.
+
+## Puzzle 2
+I was able to reuse the code from Puzzle 1, but had to refactor it to enable a line preprocessor.
+Got hung up on ```oneight``` becoming ```18``` instead of ```1ight```.  Despite this, the test data worked like a charm, 
+but the specification of how to preprocess the data was not clear.  
+
+The test data case that should have shown expected behavior was ```eightwothree``` unfortunately 
+with method one generated ```8wo3``` vs the expected ```823```.  Luckily I figured out.
+
+## Summary
+Done by 1am EST on Day 1 - I'm happy with that, and ready for Day 2.
