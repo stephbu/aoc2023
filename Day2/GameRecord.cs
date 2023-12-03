@@ -9,7 +9,7 @@ public struct GameRecord
         var result = new GameRecord();
 
         var segments = record.Split(':');
-        result.Id = int.Parse(segments[0].Replace("Game ","").Trim());
+        result.Id = int.Parse(segments[0].Replace("Game ", "").Trim());
 
         var drawSegments = segments[1].Split(';');
         result.Draws = new Draw[drawSegments.Length];
@@ -21,18 +21,16 @@ public struct GameRecord
 
         return result;
     }
-    
+
     public bool IsPossible(Draw limit1)
     {
         var b = true;
-        foreach (var draw in this.Draws)
-        {
+        foreach (var draw in Draws)
             if (draw.Blue > limit1.Blue || draw.Red > limit1.Red || draw.Green > limit1.Green)
             {
                 b = false;
                 break;
             }
-        }
 
         return b;
     }

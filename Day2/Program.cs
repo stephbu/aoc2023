@@ -30,23 +30,14 @@ int DoPuzzle1(string file, Draw limit)
 int CalculatePower(GameRecord g)
 {
     var draws = g.Draws;
-    
-    Draw minimumDraw = new Draw { Red = 0, Green = 0, Blue = 0};
+
+    var minimumDraw = new Draw { Red = 0, Green = 0, Blue = 0 };
     foreach (var draw in draws)
     {
-        if(draw.Red > minimumDraw.Red)
-        {
-            minimumDraw.Red = draw.Red;
-        }
-        if(draw.Green > minimumDraw.Green)
-        {
-            minimumDraw.Green = draw.Green;
-        }
-        if(draw.Blue > minimumDraw.Blue)
-        {
-            minimumDraw.Blue = draw.Blue;
-        }
+        if (draw.Red > minimumDraw.Red) minimumDraw.Red = draw.Red;
+        if (draw.Green > minimumDraw.Green) minimumDraw.Green = draw.Green;
+        if (draw.Blue > minimumDraw.Blue) minimumDraw.Blue = draw.Blue;
     }
-    
+
     return minimumDraw.Red * minimumDraw.Green * minimumDraw.Blue;
 }

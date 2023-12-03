@@ -5,12 +5,25 @@ namespace Day1;
 
 public class Day1
 {
+    public static Dictionary<string, char> DigitMap = new()
+    {
+        { "one", '1' },
+        { "two", '2' },
+        { "three", '3' },
+        { "four", '4' },
+        { "five", '5' },
+        { "six", '6' },
+        { "seven", '7' },
+        { "eight", '8' },
+        { "nine", '9' }
+    };
+
     public static int GetTransformedSum(string file)
     {
         var lines = File.GetTextFileValues(file);
 
         var totalSum = 0;
-        
+
         foreach (var line in lines)
         {
             var checksum = GetTransformedSumFromLine(line);
@@ -19,43 +32,26 @@ public class Day1
 
         return totalSum;
     }
-    
-    public static Dictionary<string,char> DigitMap = new Dictionary<string, char>()
-    {
-        {"one", '1'},
-        {"two", '2'},
-        {"three", '3'},
-        {"four", '4'},
-        {"five", '5'},
-        {"six", '6'},
-        {"seven", '7'},
-        {"eight", '8'},
-        {"nine", '9'},
-    };
-    
+
     public static int GetTransformedSumFromLine(string line)
     {
         var transformedStringBuilder = new StringBuilder();
-        
+
         // ltr find first digit or digit name
         var isMatch = false;
-        for(int i=0; i < line.Length && !isMatch; i++)
-        {
+        for (var i = 0; i < line.Length && !isMatch; i++)
             if (char.IsDigit(line[i]))
             {
                 transformedStringBuilder.Append(line[i]);
                 isMatch = true;
-                continue;
             }
             else
             {
                 foreach (var numberMapKey in DigitMap.Keys)
                 {
-                    if(i + numberMapKey.Length > line.Length)
-                    {
+                    if (i + numberMapKey.Length > line.Length)
                         // skip digit names that are too long
                         continue;
-                    }
                     if (line.Substring(i).StartsWith(numberMapKey))
                     {
                         // found a match append digit and skip ahead
@@ -65,27 +61,22 @@ public class Day1
                     }
                 }
             }
-        }
-        
+
         // rtl find last digit or digit name
         isMatch = false;
-        for (int i = line.Length - 1; i >= 0 && !isMatch; i--)
-        {
+        for (var i = line.Length - 1; i >= 0 && !isMatch; i--)
             if (char.IsDigit(line[i]))
             {
                 transformedStringBuilder.Append(line[i]);
                 isMatch = true;
-                continue;
             }
             else
             {
                 foreach (var numberMapKey in DigitMap.Keys)
                 {
-                    if(i + numberMapKey.Length > line.Length)
-                    {
+                    if (i + numberMapKey.Length > line.Length)
                         // skip digit names that are too long
                         continue;
-                    }
                     if (line.Substring(i).StartsWith(numberMapKey))
                     {
                         // found a match append digit and skip ahead
@@ -95,23 +86,19 @@ public class Day1
                     }
                 }
             }
-        }
 
         var transformedString = transformedStringBuilder.ToString();
-        
+
         var sum = GetChecksumFromLine(transformedString);
         Console.WriteLine($"{line} -> {transformedString} = {sum}");
         return sum;
     }
-    
-    
-    
+
+
     public static int GetTransformedSumFromLineOld(string line)
     {
-        
         var transformedStringBuilder = new StringBuilder();
-        for(int i=0; i < line.Length; i++)
-        {
+        for (var i = 0; i < line.Length; i++)
             if (char.IsDigit(line[i]))
             {
                 transformedStringBuilder.Append(line[i]);
@@ -121,10 +108,7 @@ public class Day1
                 var isMatch = false;
                 foreach (var numberMapKey in DigitMap.Keys)
                 {
-                    if(i + numberMapKey.Length > line.Length)
-                    {
-                        continue;
-                    }
+                    if (i + numberMapKey.Length > line.Length) continue;
                     if (line.Substring(i, numberMapKey.Length).StartsWith(numberMapKey))
                     {
                         // found a match
@@ -136,27 +120,24 @@ public class Day1
                 }
 
                 if (isMatch == false)
-                {
                     // no match 
                     transformedStringBuilder.Append(line[i]);
-                }
             }
-        }
 
         var transformedString = transformedStringBuilder.ToString();
 
-        
+
         var sum = GetChecksumFromLine(transformedString);
         Console.WriteLine($"{line} -> {transformedString} = {sum}");
         return sum;
     }
-    
+
     public static int GetSum(string file)
     {
         var lines = File.GetTextFileValues(file);
 
         var totalSum = 0;
-        
+
         foreach (var line in lines)
         {
             var sum = GetChecksumFromLine(line);

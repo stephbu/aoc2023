@@ -1,7 +1,5 @@
 namespace Day1;
 
-using Utility;
-
 public static class Puzzle1
 {
     public static void Do()

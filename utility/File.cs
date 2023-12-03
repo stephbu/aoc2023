@@ -1,6 +1,6 @@
 namespace Utility;
 
-public static class File 
+public static class File
 {
     public static uint[] GetValuesFromFile(string filename)
     {
@@ -9,9 +9,6 @@ public static class File
 
     public static IEnumerable<string> GetTextFileValues(string filename)
     {
-        foreach (string line in System.IO.File.ReadLines(filename))
-        {  
-            yield return line;
-        }  
+        foreach (var line in System.IO.File.ReadLines(filename)) yield return line;
     }
 }

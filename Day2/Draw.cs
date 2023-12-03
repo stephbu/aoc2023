@@ -3,11 +3,11 @@ public struct Draw
     public int Blue;
     public int Red;
     public int Green;
-    
+
     public static Draw Parse(string draw)
     {
         var result = new Draw();
-    
+
         var segments = draw.Split(',');
         foreach (var segment in segments)
         {
