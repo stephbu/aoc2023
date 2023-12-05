@@ -1,7 +1,7 @@
 ﻿using File = Utility.File;
 
-//Console.WriteLine($"Puzzle 1 Test: {DoPuzzle1("day5_test.txt")}");
-//Console.WriteLine($"Puzzle 1: {DoPuzzle1("day5.txt")}");
+Console.WriteLine($"Puzzle 1 Test: {DoPuzzle1("day5_test.txt")}");
+Console.WriteLine($"Puzzle 1: {DoPuzzle1("day5.txt")}");
 
 Console.WriteLine($"Puzzle 2 Test: {DoPuzzle2("day5_test.txt")}");
 Console.WriteLine($"Puzzle 2: {DoPuzzle2("day5.txt")}");
@@ -19,10 +19,10 @@ long DoPuzzle2(string file)
 {
     var (seeds, maps) = Parse(file);
     var min = seeds.Select((value, index) => new { value, index })
-        .GroupBy(x => x.index / 2, x => x.value)
+        .GroupBy(x => x.index / 2, x => x.value)  // group into pairs
         .AsParallel()
-        .SelectMany(g => GenerateSeeds(g.First(), g.Last()))
-        .Select(s => GetSeedLocation(s, maps))
+        .SelectMany(g => GenerateSeeds(g.First(), g.Last())) // flatten results into IEnum<long>
+        .Select(s => GetSeedLocation(s, maps)) 
         .Min();
     
     return min;
@@ -37,75 +37,9 @@ IEnumerable<long> GenerateSeeds(long start, long count)
     }
 }   
 
-// long DoPuzzle2(string file)
-// {
-//     var (seeds, maps) = Parse(file);
-//
-//     var newSeeds = seeds.Select((value, index) => new { value, index })
-//         .GroupBy(x => x.index / 2, x => x.value)
-//         .Select(g => new Range()
-//         {
-//             Start = g.First(),
-//             End = g.First() + g.Last() - 1,
-//         }).ToArray();
-//     
-//     
-//     var seedSoil = RemapRanges(newSeeds, maps["seed"]["soil"]).ToList();
-//     var soilFertilizer = RemapRanges(seedSoil, maps["soil"]["fertilizer"]).ToList();
-//     var fertilizerWater = RemapRanges(soilFertilizer, maps["fertilizer"]["water"]).ToList();
-//     var waterLight = RemapRanges(fertilizerWater, maps["water"]["light"]).ToList();
-//     var lightTemperature = RemapRanges(waterLight, maps["light"]["temperature"]).ToList();
-//     var temperatureHumidity = RemapRanges(lightTemperature, maps["temperature"]["humidity"]).ToList();
-//     var humidityLocation = RemapRanges(temperatureHumidity, maps["humidity"]["location"]).ToList();
-//
-//     var min = humidityLocation.MinBy(r => r.Start);
-//     return 0;
-// }
-
-/*
-Range[] RemapRanges(IEnumerable<Range> ranges, List<SourceRangeDestRange> map)
-{
-    var remapped = new List<Range>();
-    var mappings = map.OrderBy(r => r.SourceStart).ToArray();
-
-    foreach (var range in ranges)
-    {
-        var overlappingMappings = mappings.Where(r => (range.Start.Between(r.SourceStart, r.SourceEnd))
-                                                       || (range.End.Between(r.SourceStart, r.SourceEnd))
-                                                       || (r.SourceStart.Between(range.Start, range.End) &&
-                                                           r.SourceEnd.Between(range.Start, range.End))
-        ).ToArray();
-
-        if (overlappingMappings.Any())
-        {
-            // there are overlaps
-            foreach (var overlappedMap in overlappingMappings)
-            {
-                var overlapRange = new Range(){Start = overlappedMap.SourceStart, End = overlappedMap.SourceEnd};
-                
-                var join = range.Join(rnage, overlappedMap.Offset).ToArray();
-                var zeroStart = join.Any(r => r.Start == 0);
-                
-                remapped.AddRange(join);
-            }
-        }
-        else
-        {
-            // no overlaps
-            remapped.Add(range);
-        }
-    }
-
-    var result = remapped.OrderBy(r => r.Start).ToArray();
-    
-    return result;
-}
-*/
-
 (IEnumerable<long>, Dictionary<string, Dictionary<string, List<SourceRangeDestRange>>>) Parse(string file)
 {
     // dictionary source -> destination -> source id -> destination id
-
     var seeds = new List<long>();
     var maps = new Dictionary<string, Dictionary<string, List<SourceRangeDestRange>>>();
     
@@ -213,169 +147,5 @@ long GetValueOrDefault(Dictionary<string, Dictionary<string, List<SourceRangeDes
     // identity transformation for missing ranges
     return from;
 }
-
-struct SourceRangeDestRange
-{
-    public long SourceStart;
-    public long SourceEnd;
-    public long Offset;
-    public long DestStart;
-    public long DestEnd;
-
-    public override string ToString()
-    {
-        return $"{SourceStart}-{SourceEnd} ({Offset})";
-
-    }
-
-}
-
-struct Range
-{
-    public Range Offset(long offset)
-    {
-        return new Range()
-        {
-            Start = this.Start + offset,
-            End = this.End + offset,
-        };
-    }
-    
-    public override string ToString()
-    {
-        return $"[{Start},{End}]";
-    }
-
-    public long Start;
-    public long End;
-
-    public IEnumerable<Range> Join(IEnumerable<SourceRangeDestRange> sdranges, long offset)
-    {
-        var remainingRanges = new List<Range>();
-        var results = new List<Range>();
-        
-        
-        
-        
-        
-        /*if (overlappingMappings.Any())
-        {
-            // there are overlaps
-            foreach (var overlappedMap in overlappingMappings)
-            {
-                var overlapRange = new Range(){Start = overlappedMap.SourceStart, End = overlappedMap.SourceEnd};
-
-                var join = currentRange.Join(overlapRange, overlappedMap.Offset).ToArray();
-                var zeroStart = join.Any(r => r.Start == 0);
-
-                results.AddRange(join);
-
-                if (zeroStart)
-                {
-                    // we have a zero start, so we need to remap the remaining ranges
-                    remainingRanges = remainingRanges.Select(r => r.Offset(overlappedMap.Offset)).ToList();
-                }
-                else
-                {
-                    // we have a non-zero start, so we need to remap the remaining ranges
-                    remainingRanges = remainingRanges.Select(r => r.Offset(overlappedMap.Offset)).ToList();
-                }
-            }
-        }
-        else
-        {
-            // no overlaps
-            results.Add(currentRange);
-        }
-
-
-
-
-        // if this range starts in the other range
-        if(this.Start >= r.Start && this.End <= r.End)
-        {
-            yield return new Range()
-            {
-                Start = this.Start + offset,
-                End = this.End + offset
-            };
-            yield break;
-        }
-
-        // if this range starts before the other range and ends in the middle of the other range
-        if(this.Start < r.Start && this.End >= this.Start && this.End <= r.End)
-        {
-            // pass through mapping
-            yield return new Range()
-            {
-                Start = this.Start,
-                End = r.Start - 1,
-            };
-
-            // remapping
-            yield return new Range()
-            {
-                Start = r.Start + offset,
-                End = this.End + offset,
-            };
-            yield break;
-        }
-
-        // if this range starts in the middle of the other range and ends after the other range
-        if(this.Start >= r.Start && this.Start <= r.End && this.End > r.End)
-        {
-            // remapping
-            yield return new Range()
-            {
-                Start = this.Start + offset,
-                End = r.End + offset,
-            };
-
-            // return balance of range without remapping
-            yield return new Range()
-            {
-                Start = r.End + 1,
-                End = this.End,
-            };
-            yield break;
-        }
-
-        // if this range starts before the other range and ends after the other range
-
-        if(this.Start < r.Start && this.End > r.End)
-        {
-            // initial segment
-            yield return new Range()
-            {
-                Start = this.Start,
-                End = r.Start - 1,
-            };
-
-            yield return new Range()
-            {
-                Start = r.Start + offset,
-                End = r.End + offset,
-            };
-            // final segment
-            yield return new Range()
-            {
-                Start = r.End + 1,
-                End = this.End,
-            };
-            yield break;
-        }
-
-        // no overlap
-        yield return this;
-    } */
-        return results;
-    }
-}
-
-public static class Extensions
-{
-    public static bool Between(this long value, long start, long end) => value >= start && value <= end;
-}
-
 
 
