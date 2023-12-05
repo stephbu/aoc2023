@@ -1,6 +1,8 @@
 ﻿using Utility;
 using File = Utility.File;
 
+const int MAX_PARALLELISM = 8;
+
 Log.Level = 1;
 
 Log.Line($"Puzzle 1 Test: {DoPuzzle1("day5_test.txt")}");
@@ -13,19 +15,43 @@ long DoPuzzle1(string file)
 {
     var (seeds, maps) = Parse(file);
     
+    var staticMap = new StaticMaps()
+    {
+        SeedToSoil = maps["seed-to-soil"],
+        SoilToFertilizer = maps["soil-to-fertilizer"],
+        FertilizerToWater = maps["fertilizer-to-water"],
+        WaterToLight = maps["water-to-light"],
+        LightToTemperature = maps["light-to-temperature"],
+        TemperatureToHumidity = maps["temperature-to-humidity"],
+        HumidityToLocation = maps["humidity-to-location"],
+    };
+    
     // do puzzle computation
-    var min = seeds.Select(s => GetSeedLocation(s, maps)).Min();
+    var min = seeds.Select(s => GetSeedLocation(s, staticMap)).Min();
     return min;
 }
 
 long DoPuzzle2(string file)
 {
     var (seeds, maps) = Parse(file);
+
+    var staticMap = new StaticMaps()
+    {
+        SeedToSoil = maps["seed-to-soil"],
+        SoilToFertilizer = maps["soil-to-fertilizer"],
+        FertilizerToWater = maps["fertilizer-to-water"],
+        WaterToLight = maps["water-to-light"],
+        LightToTemperature = maps["light-to-temperature"],
+        TemperatureToHumidity = maps["temperature-to-humidity"],
+        HumidityToLocation = maps["humidity-to-location"],
+    };
+    
     var min = seeds.Select((value, index) => new { value, index })
         .GroupBy(x => x.index / 2, x => x.value)  // group into pairs
-        .AsParallel()
+        .OrderByDescending(g => g.Last()) // schedule the largest seed groups first
+        .AsParallel().WithDegreeOfParallelism(MAX_PARALLELISM) // execute in parallel pinned to Performance Core Count
         .SelectMany(g => GenerateSeeds(g.First(), g.Last())) // flatten results into IEnum<long>
-        .Select(s => GetSeedLocation(s, maps)) 
+        .Select(s => GetSeedLocation(s, staticMap)) 
         .Min();
     
     return min;
@@ -109,20 +135,20 @@ IEnumerable<long> GenerateSeeds(long start, long count)
         Log.Info($"{sectionName} -> {range.Range} ({range.Offset})");
     }
     
-    var result = maps.ToDictionary(k => k.Key, v => v.Value.ToArray());
+    var result = maps.ToDictionary(k => k.Key, v => v.Value.OrderBy(v => v.Range.Start).ToArray());
     
     return (seeds, result);
 }
 
-long GetSeedLocation(long seed, Dictionary<string, Mapping[]> maps)
+long GetSeedLocation(long seed, StaticMaps maps)
 {
-    var seedSoil = GetValueOrDefault(maps, seed, "seed-to-soil");
-    var soilFertilizer = GetValueOrDefault(maps, seedSoil, "soil-to-fertilizer");
-    var fertilizerWater = GetValueOrDefault(maps, soilFertilizer, "fertilizer-to-water");
-    var waterLight = GetValueOrDefault(maps, fertilizerWater, "water-to-light");
-    var lightTemperature = GetValueOrDefault(maps, waterLight, "light-to-temperature");
-    var temperatureHumidity = GetValueOrDefault(maps, lightTemperature, "temperature-to-humidity");
-    var humidityLocation = GetValueOrDefault(maps, temperatureHumidity, "humidity-to-location");
+    var seedSoil = GetValueOrDefault(maps.SeedToSoil, seed);
+    var soilFertilizer = GetValueOrDefault(maps.SoilToFertilizer, seedSoil);
+    var fertilizerWater = GetValueOrDefault(maps.FertilizerToWater, soilFertilizer);
+    var waterLight = GetValueOrDefault(maps.WaterToLight, fertilizerWater);
+    var lightTemperature = GetValueOrDefault(maps.LightToTemperature, waterLight);
+    var temperatureHumidity = GetValueOrDefault(maps.TemperatureToHumidity, lightTemperature);
+    var humidityLocation = GetValueOrDefault(maps.HumidityToLocation, temperatureHumidity);
     
     #if DEBUG
     Log.Info($"Seed {seed}, soil {seedSoil}, fertilizer {soilFertilizer}, water {fertilizerWater}, light {waterLight}, temperature {lightTemperature}, humidity {temperatureHumidity}, location: {humidityLocation}");
@@ -131,14 +157,27 @@ long GetSeedLocation(long seed, Dictionary<string, Mapping[]> maps)
     return humidityLocation;
 }
 
-long GetValueOrDefault(Dictionary<string, Mapping[]> maps, long from, string fromTo)
+long GetValueOrDefault(Mapping[] maps, long from)
 {
-    var matchingMapping = maps[fromTo].Where(m => from.Between(m.Range.Start,m.Range.End)).ToArray();
-    if (matchingMapping.Length == 0)
+    for(int i = 0; i < maps.Length; i++)
     {
-        // identity transformation for missing ranges
-        return from;
+        if (from.Between(maps[i].Range.Start, maps[i].Range.End))
+        {
+            return from + maps[i].Offset;
+        }
     }
-    return from + matchingMapping[0].Offset;
+    // identity transformation for missing ranges
+    return from;
+}
+
+struct StaticMaps()
+{
+    public Mapping[] SeedToSoil;
+    public Mapping[] SoilToFertilizer;
+    public Mapping[] FertilizerToWater;
+    public Mapping[] WaterToLight;
+    public Mapping[] LightToTemperature;
+    public Mapping[] TemperatureToHumidity;
+    public Mapping[] HumidityToLocation;
 }
 
