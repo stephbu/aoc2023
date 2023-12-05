@@ -37,11 +37,11 @@ IEnumerable<long> GenerateSeeds(long start, long count)
     }
 }   
 
-(IEnumerable<long>, Dictionary<string, Dictionary<string, List<SourceRangeDestRange>>>) Parse(string file)
+(IEnumerable<long>, Dictionary<string, Dictionary<string, List<Mapping>>>) Parse(string file)
 {
     // dictionary source -> destination -> source id -> destination id
     var seeds = new List<long>();
-    var maps = new Dictionary<string, Dictionary<string, List<SourceRangeDestRange>>>();
+    var maps = new Dictionary<string, Dictionary<string, List<Mapping>>>();
     
     var data = File.GetTextFileValues(file);
     
@@ -84,13 +84,13 @@ IEnumerable<long> GenerateSeeds(long start, long count)
             // add map if not exists
             if(!maps.ContainsKey(mapFrom))
             {
-                maps.Add(mapFrom, new Dictionary<string, List<SourceRangeDestRange>>());
+                maps.Add(mapFrom, new Dictionary<string, List<Mapping>>());
             }
             
             // add map if not exists
             if(!maps[mapFrom].ContainsKey(mapTo))
             {
-                maps[mapFrom].Add(mapTo, new List<SourceRangeDestRange>());
+                maps[mapFrom].Add(mapTo, new List<Mapping>());
             }
 
             Console.WriteLine($"Map Section: {mapFrom} -> {mapTo}");
@@ -105,21 +105,18 @@ IEnumerable<long> GenerateSeeds(long start, long count)
             .Select(i => long.Parse(i))
             .ToArray();
 
-        var range = new SourceRangeDestRange()
+        var range = new Mapping()
         {
-            SourceStart = mapSegments[1], 
-            SourceEnd = mapSegments[1] + mapSegments[2] - 1, 
-            DestStart = mapSegments[0],
-            DestEnd = mapSegments[0] + mapSegments[2] - 1,
+            Range = new Range{Start=mapSegments[1], End=mapSegments[1] + mapSegments[2] - 1},
             Offset = mapSegments[0] - mapSegments[1],
         };
         maps[mapFrom][mapTo].Add(range);
-        Console.WriteLine($"{mapFrom} -> {mapTo}: {range.SourceStart} - {range.SourceEnd} -> {range.DestStart} - {range.DestEnd}");
+        Console.WriteLine($"{mapFrom} -> {mapTo}: {range.Range} ({range.Offset})");
     }
     return (seeds, maps);
 }
 
-long GetSeedLocation(long seed, Dictionary<string, Dictionary<string, List<SourceRangeDestRange>>> maps)
+long GetSeedLocation(long seed, Dictionary<string, Dictionary<string, List<Mapping>>> maps)
 {
     var seedSoil = GetValueOrDefault(maps, seed, "seed", "soil");
     var soilFertilizer = GetValueOrDefault(maps, seedSoil, "soil", "fertilizer");
@@ -134,15 +131,12 @@ long GetSeedLocation(long seed, Dictionary<string, Dictionary<string, List<Sourc
     return humidityLocation;
 }
 
-long GetValueOrDefault(Dictionary<string, Dictionary<string, List<SourceRangeDestRange>>> maps, long from, string fromType, string toType)
+long GetValueOrDefault(Dictionary<string, Dictionary<string, List<Mapping>>> maps, long from, string fromType, string toType)
 {
-    if (maps[fromType].ContainsKey(toType) && maps[fromType][toType].Any(r => r.SourceStart <= from && r.SourceEnd >= from))
+    if (maps[fromType].ContainsKey(toType) && maps[fromType][toType].Any(r => r.Range.Start <= from && r.Range.End >= from))
     {
-        var r = maps[fromType][toType].First(r => r.SourceStart <= from && r.SourceEnd >= from);
-        
-        var offset = from - r.SourceStart;
-        
-        return r.DestStart + offset;
+        var m = maps[fromType][toType].First(m => m.Range.Start <= from && m.Range.End >= from);
+        return from + m.Offset;
     }
     // identity transformation for missing ranges
     return from;
