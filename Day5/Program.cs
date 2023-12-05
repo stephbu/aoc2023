@@ -1,10 +1,13 @@
-﻿using File = Utility.File;
+﻿using Utility;
+using File = Utility.File;
 
-Console.WriteLine($"Puzzle 1 Test: {DoPuzzle1("day5_test.txt")}");
-Console.WriteLine($"Puzzle 1: {DoPuzzle1("day5.txt")}");
+Log.Level = 1;
 
-Console.WriteLine($"Puzzle 2 Test: {DoPuzzle2("day5_test.txt")}");
-Console.WriteLine($"Puzzle 2: {DoPuzzle2("day5.txt")}");
+Log.Line($"Puzzle 1 Test: {DoPuzzle1("day5_test.txt")}");
+Log.Line($"Puzzle 1: {DoPuzzle1("day5.txt")}");
+
+Log.Line($"Puzzle 2 Test: {DoPuzzle2("day5_test.txt")}");
+Log.Line($"Puzzle 2: {DoPuzzle2("day5.txt")}");
 
 long DoPuzzle1(string file)
 {
@@ -30,39 +33,40 @@ long DoPuzzle2(string file)
 
 IEnumerable<long> GenerateSeeds(long start, long count)
 {
-    Console.WriteLine($"[{DateTime.UtcNow}] Seeds: {start} - {start + count - 1}");
+    var startTime = DateTime.Now;
+    Log.Line($"Generating Seeds: {count} ({start} - {start + count - 1})");
     for (long x = 0; x < count; x++)
     {
         yield return start + x;
     }
+    var endTime = DateTime.Now;
+    Log.Line($"Generated Seeds: {count} {count/(endTime - startTime).TotalSeconds} seeds/second");
 }   
 
-(IEnumerable<long>, Dictionary<string, Dictionary<string, List<Mapping>>>) Parse(string file)
+(IEnumerable<long>, Dictionary<string, Mapping[]>) Parse(string file)
 {
     // dictionary source -> destination -> source id -> destination id
     var seeds = new List<long>();
-    var maps = new Dictionary<string, Dictionary<string, List<Mapping>>>();
+    var maps = new Dictionary<string, List<Mapping>>();
     
     var data = File.GetTextFileValues(file);
     
     var inMapSection = false;
-    var mapFrom = "";
-    var mapTo = "";
+    var sectionName = "";
     foreach(var line in data)
     {
         if (line.StartsWith("seeds:"))
         {
             var seedsRaw = line.Replace("seeds:", "").Trim().Split(" ");
             seeds.AddRange(seedsRaw.Select(i => long.Parse(i)));
-            // Console.WriteLine($"Seeds Added: {seedsRaw.Length}");
+            Log.Info($"Seeds Added: {seedsRaw.Length}");
             continue;
         }
 
         if (line == "" && inMapSection)
         {
             // map footer
-            // Console.WriteLine($"End Map Section: {mapFrom} -> {mapTo}");
-
+            Log.Info($"End Map Section: {sectionName}");
             inMapSection = false;
             continue;
         }
@@ -76,30 +80,21 @@ IEnumerable<long> GenerateSeeds(long start, long count)
         if(line != "" && !inMapSection && line.EndsWith(" map:"))
         {
             // scrub line for transformation
-            var mapLine = line.Replace(" map:", "").Trim();
-            var mapLineSegments = mapLine.Split("-to-");
-            mapFrom = mapLineSegments[0].Trim();
-            mapTo = mapLineSegments[1].Trim();
+            sectionName = line.Replace(" map:", "").Trim();
             
             // add map if not exists
-            if(!maps.ContainsKey(mapFrom))
+            if(!maps.ContainsKey(sectionName))
             {
-                maps.Add(mapFrom, new Dictionary<string, List<Mapping>>());
-            }
-            
-            // add map if not exists
-            if(!maps[mapFrom].ContainsKey(mapTo))
-            {
-                maps[mapFrom].Add(mapTo, new List<Mapping>());
+                maps.Add(sectionName, new List<Mapping>());
             }
 
-            Console.WriteLine($"Map Section: {mapFrom} -> {mapTo}");
+            Log.Info($"Map Section: {sectionName}");
             inMapSection = true;
             continue;
         }
         
         // map value
-        // Console.WriteLine($"Map Values: {line}");
+        Log.Info($"Map Values: {line}");
         var mapSegments = line
             .Split(" ", StringSplitOptions.TrimEntries|StringSplitOptions.RemoveEmptyEntries)
             .Select(i => long.Parse(i))
@@ -110,36 +105,40 @@ IEnumerable<long> GenerateSeeds(long start, long count)
             Range = new Range{Start=mapSegments[1], End=mapSegments[1] + mapSegments[2] - 1},
             Offset = mapSegments[0] - mapSegments[1],
         };
-        maps[mapFrom][mapTo].Add(range);
-        Console.WriteLine($"{mapFrom} -> {mapTo}: {range.Range} ({range.Offset})");
+        maps[sectionName].Add(range);
+        Log.Info($"{sectionName} -> {range.Range} ({range.Offset})");
     }
-    return (seeds, maps);
+    
+    var result = maps.ToDictionary(k => k.Key, v => v.Value.ToArray());
+    
+    return (seeds, result);
 }
 
-long GetSeedLocation(long seed, Dictionary<string, Dictionary<string, List<Mapping>>> maps)
+long GetSeedLocation(long seed, Dictionary<string, Mapping[]> maps)
 {
-    var seedSoil = GetValueOrDefault(maps, seed, "seed", "soil");
-    var soilFertilizer = GetValueOrDefault(maps, seedSoil, "soil", "fertilizer");
-    var fertilizerWater = GetValueOrDefault(maps, soilFertilizer, "fertilizer", "water");
-    var waterLight = GetValueOrDefault(maps, fertilizerWater, "water", "light");
-    var lightTemperature = GetValueOrDefault(maps, waterLight, "light", "temperature");
-    var temperatureHumidity = GetValueOrDefault(maps, lightTemperature, "temperature", "humidity");
-    var humidityLocation = GetValueOrDefault(maps, temperatureHumidity, "humidity", "location");
+    var seedSoil = GetValueOrDefault(maps, seed, "seed-to-soil");
+    var soilFertilizer = GetValueOrDefault(maps, seedSoil, "soil-to-fertilizer");
+    var fertilizerWater = GetValueOrDefault(maps, soilFertilizer, "fertilizer-to-water");
+    var waterLight = GetValueOrDefault(maps, fertilizerWater, "water-to-light");
+    var lightTemperature = GetValueOrDefault(maps, waterLight, "light-to-temperature");
+    var temperatureHumidity = GetValueOrDefault(maps, lightTemperature, "temperature-to-humidity");
+    var humidityLocation = GetValueOrDefault(maps, temperatureHumidity, "humidity-to-location");
     
-    // Console.WriteLine($"Seed {seed}, soil {seedSoil}, fertilizer {soilFertilizer}, water {fertilizerWater}, light {waterLight}, temperature {lightTemperature}, humidity {temperatureHumidity}, location: {humidityLocation}");
+    #if DEBUG
+    Log.Info($"Seed {seed}, soil {seedSoil}, fertilizer {soilFertilizer}, water {fertilizerWater}, light {waterLight}, temperature {lightTemperature}, humidity {temperatureHumidity}, location: {humidityLocation}");
+    #endif
     
     return humidityLocation;
 }
 
-long GetValueOrDefault(Dictionary<string, Dictionary<string, List<Mapping>>> maps, long from, string fromType, string toType)
+long GetValueOrDefault(Dictionary<string, Mapping[]> maps, long from, string fromTo)
 {
-    if (maps[fromType].ContainsKey(toType) && maps[fromType][toType].Any(r => r.Range.Start <= from && r.Range.End >= from))
+    var matchingMapping = maps[fromTo].Where(m => from.Between(m.Range.Start,m.Range.End)).ToArray();
+    if (matchingMapping.Length == 0)
     {
-        var m = maps[fromType][toType].First(m => m.Range.Start <= from && m.Range.End >= from);
-        return from + m.Offset;
+        // identity transformation for missing ranges
+        return from;
     }
-    // identity transformation for missing ranges
-    return from;
+    return from + matchingMapping[0].Offset;
 }
-
 
