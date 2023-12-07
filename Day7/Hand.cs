@@ -1,9 +1,7 @@
 namespace Day7;
-using Utility;
 
 public struct Hand(string cards, long bid, IHandComparer comparer) : IComparable<Hand>
 {
-
     private readonly IHandComparer _comparer = comparer;
     public string Cards = cards;
     public long Bid = bid;
@@ -17,5 +15,4 @@ public struct Hand(string cards, long bid, IHandComparer comparer) : IComparable
     {
         return $"{String.Concat(this.Cards)} ({this.Bid})";
     }
-    
 }

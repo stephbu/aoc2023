@@ -4,12 +4,14 @@ namespace Day7;
 
 public class Puzzle1Comparer : IHandComparer
 {
+    // card comparer
     public int Compare(char x, char y)
     {
         const string rank = "23456789TQJKA";
         return rank.IndexOf(x).CompareTo(rank.IndexOf(y));
     }
 
+    // hand comparer
     public int Compare(Hand h1, Hand h2)
     {
         var rank1 = GetRank(h1);
@@ -38,10 +40,10 @@ public class Puzzle1Comparer : IHandComparer
 
     private HandRank GetRank(Hand hand)
     {
-        var cardGroups = hand.Cards.GroupBy(c => c, c => c)
-            .OrderByDescending(g => g.Count())
-            .ThenBy(g => g.Key)
-            .Select(g => g.Count());
+        var cardGroups = hand.Cards.GroupBy(c => c, c => c) // 99TTT => 9(99),T(TTT) 
+            .OrderByDescending(g => g.Count()) // Best sets of card groups first e.g. T(TTT), 9(99)
+            .ThenBy(g => g.Key) // order by the key card value. T(TT),9(99)
+            .Select(g => g.Count()); // count cards in each group. T(TTT), 9(99) => 3,2
 
         HandRank rank = HandRank.None;
     
