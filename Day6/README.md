@@ -10,7 +10,7 @@ State of mind: tired.
 Started just after 9:30pm.
 
 ## Puzzle 1
-The recipe is familiar, parse into structs, build a process to process the data.  Initial puzzle was pretty easy
+The recipe is familiar, parse into structs, build function to process the data.  Initial puzzle was pretty easy
 once I validated the parser.  Quick napkin diagram to validate the assumptions.  Used LINQ to rainbow out the permutations and 
 gather up the "Power" calc.  Completed part 1 in less than 30mins.
 
