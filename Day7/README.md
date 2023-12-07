@@ -20,6 +20,7 @@ Completed part 1 in around an hour.
 Part 2 was a little more involved.  I reimplemented ```IComparable<Hand>``` and ```IComparable<Card>``` as ```IHandComparer<T>``` which implements both interfaces.
 Moved Puzzle1 comparers out into ```Puzzle1Comparer```, and stitched ```IHandComparer``` back through the code.  
 Implemented an updated ```Puzzle2Comparer``` to handle the change in rules.  Completed part 2 in around 45mins.
+Interesting corner case around ```JJJJJ```.
 
 ## Summary
 AoC seems to be alternating tasks between easy and hard.  This was probably more fiddly than difficult.
