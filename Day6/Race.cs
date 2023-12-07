@@ -1,6 +1,6 @@
 using Utility;
 
-struct Race
+internal struct Race
 {
     public long RaceDuration;
     public long RecordDistance;
@@ -13,10 +13,10 @@ struct Race
             .Count(t => current.GetRacePermutation(t) > current.RecordDistance);
         return result;
     }
-    
+
     public long GetRacePermutation(long accelerationTime)
     {
-        var distance = accelerationTime * (this.RaceDuration - accelerationTime);
+        var distance = accelerationTime * (RaceDuration - accelerationTime);
         return distance;
     }
 }

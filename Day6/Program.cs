@@ -1,7 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using System.Runtime.CompilerServices;
-using Utility;
+﻿using Utility;
 using File = Utility.File;
 
 Log.Line($"Puzzle 1 Test: {DoPuzzle1("day6_puzzle1_test.txt")}");
@@ -16,7 +13,7 @@ long DoPuzzle1(string file)
     var data = File.GetTextFileValues(file);
     var races = Parse(data);
     var sum = races.Select(r => r.GetWinningPermutations()).Aggregate((item, acc) => item * acc);
-    
+
     return sum;
 }
 
@@ -24,12 +21,13 @@ long DoPuzzle2(string file)
 {
     var data = File.GetTextFileValues(file);
     var races = Parse(data);
-    
-    string strDuration = races.Select(r => r.RaceDuration).Aggregate<long, string>("",(acc, item) => acc + item.ToString());
-    string strDistance = races.Select(r => r.RecordDistance).Aggregate<long, string>("",(acc, item) => acc + item.ToString());;
 
-    var race = new Race() { RaceDuration = long.Parse(strDuration), RecordDistance = long.Parse(strDistance) };
-    
+    var strDuration = races.Select(r => r.RaceDuration).Aggregate<long, string>("", (acc, item) => acc + item);
+    var strDistance = races.Select(r => r.RecordDistance).Aggregate<long, string>("", (acc, item) => acc + item);
+    ;
+
+    var race = new Race { RaceDuration = long.Parse(strDuration), RecordDistance = long.Parse(strDistance) };
+
     var permutations = Linq.Sequence(1, race.RaceDuration)
         .AsParallel().WithDegreeOfParallelism(8)
         .Count(t => race.GetRacePermutation(t) > race.RecordDistance);
@@ -39,7 +37,7 @@ long DoPuzzle2(string file)
 
 Race[] Parse(IEnumerable<string> lines)
 {
-    List<Race> races = new List<Race>();
+    var races = new List<Race>();
 
     var timesRaw = lines
         .Take(1)
@@ -57,10 +55,8 @@ Race[] Parse(IEnumerable<string> lines)
         .Select(s => long.Parse(s))
         .ToArray();
 
-    for (int i = 0; i < timesRaw.Length; i++)
-    {
-        races.Add(new Race{RaceDuration = timesRaw[i], RecordDistance = distancesRaw[i]});
-    }
+    for (var i = 0; i < timesRaw.Length; i++)
+        races.Add(new Race { RaceDuration = timesRaw[i], RecordDistance = distancesRaw[i] });
 
     return races.ToArray();
 }
